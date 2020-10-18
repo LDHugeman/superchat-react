@@ -47,27 +47,25 @@ function SignOut() {
 
 function ChatRoom() {
   const dummy = useRef();
-  const messagesRef = firestore.collection("messages");
-  const query = messagesRef.orderBy("createdAt").limit(25);
-
+  const query = firestore.collection("messages")
+    .orderBy("createdAt")
+    .limitToLast(30);
   const [messages] = useCollectionData(query, { idField: "id" });
-
   const [formValue, setFormValue] = useState('');
-  
 
   const sendMessage = async(e) => {
     e.preventDefault();
-
     const {uid, photoURL} = auth.currentUser;
+    await firestore.collection("messages").add({
+      text: formValue,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      uid,
+      photoURL
+    });
 
-    await messagesRef.add({
-        text: formValue,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        uid,
-        photoURL
-      });
-      setFormValue('');
-      dummy.current.scrollIntoView({behaviour: 'smooth'});
+  setFormValue('');
+  dummy.current.scrollIntoView({behaviour: 'smooth'});
+
   }
 
   return (<>
